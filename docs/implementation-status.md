@@ -100,6 +100,7 @@ No live release or physical-device update installation has been performed by thi
   this does not verify the separately configured GitHub secrets.
 - Fixed the release workflow's unavailable `testReleaseUnitTest` invocation. AGP 9
   exposes `testDebugUnitTest` under this project's default configuration. Native
-  tests now run in a separate step before the signed release build. The replacement
+  tests now run in a separate step after the signed release build and before
+  publication, so Flutter generates the Git-ignored Gradle wrapper first. The replacement
   Gradle command succeeded locally; workflow YAML, shell syntax, and step ordering
   checks passed. Hosted execution still requires pushing the updated workflow.

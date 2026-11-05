@@ -55,11 +55,6 @@ jobs:
           flutter analyze --no-pub
           flutter test --no-pub
           python3 -m unittest discover -s tool -p 'test_*.py'
-      - name: Run native update verification tests
-        # AGP 9 creates unit tests for the tested build type (debug) by default.
-        # These shared src/test policies also protect the release APK.
-        working-directory: android
-        run: ./gradlew :app:testDebugUnitTest
       - name: Configure signing and build release APK
         env:
           KEYSTORE_BASE64: ${{ secrets.PHOMANACHI_KEYSTORE_BASE64 }}
@@ -74,6 +69,10 @@ jobs:
           trap 'rm -f "$PHOMANACHI_KEYSTORE_PATH"' EXIT
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$PHOMANACHI_KEYSTORE_PATH"
           flutter build apk --release --no-pub
+      - name: Run native update verification tests
+        # Flutter's build generates the Git-ignored Gradle wrapper on a fresh checkout.
+        # AGP 9 creates shared src/test unit tests for debug by default.
+        run: bash "$GITHUB_WORKSPACE/android/gradlew" -p "$GITHUB_WORKSPACE/android" :app:testDebugUnitTest
       - name: Prepare verified updater assets
         env:
           MILESTONE_TITLE: ${{ inputs.milestone_title }}

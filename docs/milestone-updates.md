@@ -200,11 +200,16 @@ No live GitHub release or real-device installation is claimed solely from a loca
 APK build or a successful unit test. The release workflow itself requires its first
 configured GitHub Actions run for hosted validation.
 
-The native verification step runs `:app:testDebugUnitTest` before building the
-signed release APK. AGP 9 enables unit tests only for the tested build type by
+The native verification step runs `:app:testDebugUnitTest` after building the
+signed release APK and before preparing or publishing assets. Flutter's build
+generates the Git-ignored Gradle wrapper, which is absent in a fresh checkout.
+AGP 9 enables unit tests only for the tested build type by
 default (debug here), so `:app:testReleaseUnitTest` is not available in this
 configuration. The tests exercise the shared `src/test` update policies and file
 integrity code; the APK is still built with `flutter build apk --release`.
+The workflow locates both the wrapper and Gradle project explicitly under
+`$GITHUB_WORKSPACE/android`, so the native test command does not depend on the
+shell's current working directory.
 
 ## Platform references
 
