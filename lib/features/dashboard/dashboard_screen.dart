@@ -273,7 +273,7 @@ class ResourceScreen extends ConsumerWidget {
           ),
           FeatureTile(
             title: 'Application Manager',
-            subtitle: 'Review application management status.',
+            subtitle: 'Find apps, review access, and open supported controls.',
             icon: Icons.apps_rounded,
             accent: Accent.warning,
             onTap: () => context.go('/applications'),
@@ -340,18 +340,6 @@ class ResourceScreen extends ConsumerWidget {
         ],
       ),
     ],
-    '/applications' => [
-      const UnavailableFeature(
-        title: 'Application inventory planned',
-        message: 'The app list, application details, search, settings shortcuts, and uninstall requests are not implemented in this build.',
-        icon: Icons.apps_rounded,
-      ),
-      const SizedBox(height: 16),
-      const InfoNotice(
-        'Android controls application access',
-        'A future inventory will show only packages visible to this app. Uninstall requests will use Android’s confirmation flow; cancellation will not be reported as success.',
-      ),
-    ],
     '/battery' => [
       const SizedBox(height: 24),
       const InfoNotice(
@@ -378,7 +366,7 @@ class ResourceScreen extends ConsumerWidget {
       const DetailCard(
         rows: [
           ('Optional file access', 'Not requested'),
-          ('Application inventory', 'Not implemented'),
+          ('Application inventory', 'Visible apps · current Android profile'),
           ('Detailed process inspection', 'Not implemented'),
           ('Manufacturer profiles', 'Not validated'),
           ('Advanced access', 'Not implemented'),
@@ -389,29 +377,6 @@ class ResourceScreen extends ConsumerWidget {
         'Physical-device validation pending',
         'Readings and manufacturer behavior still need validation on Realme 5i and TECNO Spark 30 5G. Refresh reads system measurements; it does not certify unsupported operations.',
         accent: Accent.warning,
-      ),
-    ],
-    '/permissions' => [
-      const InfoNotice(
-        'Only when you need them',
-        'Basic memory, battery, and storage-capacity readings use standard Android APIs. No optional permission is requested at first launch.',
-        accent: Accent.mint,
-        icon: Icons.lock_outline,
-      ),
-      const SectionHeading('Access in this build'),
-      const DetailCard(
-        rows: [
-          ('Memory and battery', 'Standard Android APIs'),
-          ('Storage capacity', 'Standard Android API · no file access'),
-          ('Media and folders', 'Not requested · scanning not implemented'),
-          ('Usage history', 'Not requested · not implemented'),
-          ('Advanced authorization', 'Not requested · not implemented'),
-        ],
-      ),
-      const SizedBox(height: 16),
-      const InfoNotice(
-        'Your choice stays in context',
-        'When optional features are added, access will be requested from that feature. Denying access will leave unrelated tools available.',
       ),
     ],
     '/advanced' => [

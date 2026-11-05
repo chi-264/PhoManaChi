@@ -6,6 +6,9 @@ import '../core/theme/app_theme.dart';
 import '../core/platform/update_api.g.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/dashboard/providers.dart';
+import '../core/platform/apps_api.g.dart';
+import '../features/applications/apps_controller.dart';
+import '../features/applications/apps_screen.dart';
 import '../features/more/more_screen.dart';
 import '../features/more/settings_screen.dart';
 import '../features/updates/updates_screen.dart';
@@ -24,7 +27,6 @@ final routerProvider = Provider<GoRouter>((ref) {
             ('/dashboard', 'Dashboard'),
             ('/processes', 'Process Manager'),
             ('/storage', 'Storage Cleaner'),
-            ('/applications', 'Application Manager'),
           ])
             StatefulShellBranch(
               routes: [
@@ -38,6 +40,22 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                path: '/applications',
+                builder: (_, _) => const AppsScreen(),
+                routes: [
+                  GoRoute(
+                    path: ':packageName',
+                    builder: (_, state) => AppDetailsScreen(
+                      packageName: state.pathParameters['packageName']!,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: '/more',
                 builder: (_, _) => const MoreScreen(),
                 routes: [
@@ -45,7 +63,6 @@ final routerProvider = Provider<GoRouter>((ref) {
                     ('battery', 'Battery Monitor'),
                     ('manufacturer', 'Manufacturer Tools'),
                     ('diagnostics', 'Diagnostics'),
-                    ('permissions', 'Permissions'),
                     ('advanced', 'Advanced Access'),
                   ])
                     GoRoute(
@@ -53,6 +70,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                       builder: (_, _) =>
                           ResourceScreen(kind: '/${entry.$1}', title: entry.$2),
                     ),
+                  GoRoute(
+                    path: 'permissions',
+                    builder: (_, _) => const PermissionsScreen(),
+                  ),
                   GoRoute(
                     path: 'updates',
                     builder: (_, _) => const UpdatesScreen(),
@@ -89,6 +110,7 @@ class _PhoneManagerAppState extends ConsumerState<PhoneManagerApp>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    AppsFlutterApi.setUp(_AppsCallbacks(changed: _refreshApps));
     UpdateFlutterApi.setUp(
       _UpdateCallbacks(
         changed: () {
@@ -103,6 +125,7 @@ class _PhoneManagerAppState extends ConsumerState<PhoneManagerApp>
 
   @override
   void dispose() {
+    AppsFlutterApi.setUp(null);
     UpdateFlutterApi.setUp(null);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -110,10 +133,23 @@ class _PhoneManagerAppState extends ConsumerState<PhoneManagerApp>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) ref.invalidate(snapshotProvider);
+    if (state == AppLifecycleState.resumed) {
+      ref.invalidate(snapshotProvider);
+      _refreshApps();
+    }
     ref
         .read(updatesProvider.notifier)
         .setForeground(state == AppLifecycleState.resumed);
+  }
+
+  void _refreshApps() {
+    if (!mounted) return;
+    ref.invalidate(appInventoryProvider);
+    ref.invalidate(appDetailsProvider);
+    ref.invalidate(capabilitiesProvider);
+    if (ref.exists(appActionsProvider)) {
+      ref.read(appActionsProvider.notifier).refresh();
+    }
   }
 
   @override
@@ -145,15 +181,21 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final largeText = MediaQuery.textScalerOf(context).scale(14) > 20;
     final wide = MediaQuery.sizeOf(context).width >= 1000 && !largeText;
-    final detail = location.startsWith('/more/');
+    final detail =
+        location.startsWith('/more/') || location.startsWith('/applications/');
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: largeText ? 88 : 72,
         leading: detail
             ? IconButton(
                 tooltip: 'Back',
-                onPressed: () =>
-                    context.canPop() ? context.pop() : context.go('/more'),
+                onPressed: () => context.canPop()
+                    ? context.pop()
+                    : context.go(
+                        location.startsWith('/applications/')
+                            ? '/applications'
+                            : '/more',
+                      ),
                 icon: const Icon(Icons.arrow_back_rounded),
               )
             : null,
@@ -327,4 +369,11 @@ class _UpdateCallbacks extends UpdateFlutterApi {
   void statusChanged() => changed();
   @override
   void openUpdates() => open();
+}
+
+class _AppsCallbacks extends AppsFlutterApi {
+  _AppsCallbacks({required this.changed});
+  final VoidCallback changed;
+  @override
+  void actionChanged() => changed();
 }

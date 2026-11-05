@@ -1,6 +1,6 @@
 # Implementation status
 
-## Current milestone: Flutter foundation and frontend redesign
+## Current milestone: App management and capabilities (0.3.0 / build 3)
 
 Implemented: Flutter Android shell, Riverpod, go_router, SharedPreferencesAsync theme,
 Pigeon contract v1, Kotlin host registration/cleanup, background system snapshot reads,
@@ -12,6 +12,14 @@ single-column layouts, wide navigation, dashboard shortcuts, nested More/back be
 and readable battery/settings/diagnostics screens. See [frontend redesign](frontend-redesign.md)
 for delivered scope and remaining native workflows.
 
+The app-management milestone adds a real visible-app inventory with search,
+user/system filters and sorting; app details and permission grant flags; Android
+settings shortcuts; reviewed, protected uninstall requests and verified/unverified
+outcomes; and a typed native capability resolver with a live Permissions screen.
+See [app management](app-management.md) for behavior, Android limitations, and
+physical-device acceptance. Version 0.3.0+3 is prepared on `feature/app-management`;
+it has not been published or physically validated yet.
+
 Automated checks cover absent/inconsistent RAM readings, unavailable values in the UI,
 and native-read errors with retry. An Android APK build checks Dart, generated bindings,
 Kotlin, Android resources, and Gradle integration together. Check the task report for the
@@ -19,8 +27,8 @@ actual build/test results; successful compilation is not physical-device validat
 
 ## Next milestones
 
-1. Capability resolver: typed per-operation states and native revalidation, permission UI,
-   visible package inventory, app settings and supported uninstall flow.
+1. Validate app management on the target phones and publish the prepared 0.3.0
+   milestone; exercise the complete update from the installed 0.2.0 build.
 2. Storage: MediaStore/SAF selection, cancellable identified scans, categories, hashing,
    explicit deletion confirmation, per-file verification, separate deleted-byte and
    free-space-change reports. Enforce critical rules natively.
@@ -114,3 +122,29 @@ release contains the APK, checksum, and update manifest. The live latest-release
 feed reports version 0.2.0 / build 2; its exact APK URL, size (52,292,177 bytes),
 and SHA-256 match GitHub's asset metadata. This verifies publication and metadata,
 not physical-device installation, certificate continuity, or notification delivery.
+
+## App-management verification (0.3.0 / build 3)
+
+- Final `flutter analyze --no-pub`: passed with no issues.
+- Final `flutter test --no-pub`: all 45 tests passed. Coverage includes inventory
+  errors/retry, filtering/search, Apps detail/back navigation, explicit uninstall
+  review/cancel, protected and changed targets, truthful action results, serialized
+  result dismissal, permission revocation/resume and refresh on opening Permissions.
+- Final `./gradlew :app:testDebugUnitTest`: passed; all 19 native tests passed
+  (8 app-policy, 8 update-policy, 3 file-integrity tests).
+- Python release tooling: all 11 tests passed.
+- Final `flutter build apk --release --no-pub`: passed using the existing development
+  signing key. APK: `build/app/outputs/flutter-apk/app-release.apk` (54,095,057 bytes).
+- Downloaded the public v0.2.0 APK, verified its published SHA-256 and signature,
+  and verified the final v0.3.0 APK has the same signing certificate. Inspected the
+  built manifest for the final selective queries and uninstall-request permission.
+- Prepared `build/milestone-release/` with the signed APK, update manifest, checksum,
+  and notes. APK identity/version/minimum SDK were read from the actual artifact;
+  prepared and built APKs have identical size and SHA-256.
+- Light/dark app-list and detail previews were generated with SDK fonts and visually
+  inspected in `build/previews/`. Fixtures are not physical-device readings.
+  Compact 320 px layouts at 2× text passed in both themes.
+- Release workflow YAML, embedded shell syntax, and build/test/publication order
+  checks passed. Publication of 0.3.0 remains pending on `feature/app-management`.
+- ADB reports no authorized connected device. Physical uninstall/settings behavior,
+  TalkBack, and the complete installed v0.2.0 → v0.3.0 update remain unverified.
