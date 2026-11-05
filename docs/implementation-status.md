@@ -76,10 +76,11 @@ banner, manual and opt-in scheduled checks, notification permission/status/deep 
 streamed/cancelable APK downloads, checksum/identity/version/signer verification,
 user-confirmed Android installation, and a signed GitHub milestone release workflow.
 
-The old APK must be updated once to bootstrap this feature. Live delivery needs a
+The old APK must be updated once to bootstrap this feature. Live delivery uses a
 public release manifest, stable signing credentials, and notification opt-in.
 See [milestone updates](milestone-updates.md) for publishing and device validation.
-No live release or physical-device update installation has been performed by this change.
+Release [v0.2.0](https://github.com/chi-264/PhoManaChi/releases/tag/v0.2.0) is now
+publicly published. Physical-device update installation remains unverified.
 
 ### Updater verification
 
@@ -91,8 +92,9 @@ No live release or physical-device update installation has been performed by thi
 - Python release-packaging unit tests: all four passed.
 - Final debug APK signature/identity inspection and release-asset preparation:
   passed. The bootstrap APK and prepared manifest have matching size and SHA-256.
-- Workflow YAML and embedded shell syntax checks passed. A hosted release workflow
-  run, production signing, publication, and physical-device verification remain pending.
+- Workflow YAML and embedded shell syntax checks passed. The first hosted release
+  workflow succeeded and published v0.2.0. Production-key migration and
+  physical-device verification remain pending.
 - Signing troubleshooting adds an early credential check before the release build.
   Seven real-keystore fixture tests cover JKS/PKCS12, separate key/store passwords,
   missing settings, wrong credentials/alias, and corrupt files without logging secrets.
@@ -103,4 +105,12 @@ No live release or physical-device update installation has been performed by thi
   tests now run in a separate step after the signed release build and before
   publication, so Flutter generates the Git-ignored Gradle wrapper first. The replacement
   Gradle command succeeded locally; workflow YAML, shell syntax, and step ordering
-  checks passed. Hosted execution still requires pushing the updated workflow.
+  checks passed. The corrected workflow subsequently succeeded on GitHub Actions.
+
+### First public deployment (5 November 2026, Asia/Manila)
+
+Verified that the milestone workflow completed successfully and the public v0.2.0
+release contains the APK, checksum, and update manifest. The live latest-release
+feed reports version 0.2.0 / build 2; its exact APK URL, size (52,292,177 bytes),
+and SHA-256 match GitHub's asset metadata. This verifies publication and metadata,
+not physical-device installation, certificate continuity, or notification delivery.

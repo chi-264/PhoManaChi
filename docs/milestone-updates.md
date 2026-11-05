@@ -187,18 +187,21 @@ identity checks, corrupted/truncated files, notification deduplication, user-ini
 download/install actions, denied permissions, offline checks, canceled downloads,
 large text, and notification deep links. See the task result for actual check outcomes.
 
-Still required before live milestone delivery:
+The first hosted workflow has succeeded and published
+[v0.2.0](https://github.com/chi-264/PhoManaChi/releases/tag/v0.2.0).
+The public latest-release feed is accessible, and its APK URL, size, and SHA-256
+agree with GitHub's asset metadata. Signing secrets were configured by the user;
+this verification did not read or change them.
 
-- Push the updater/workflow and configure stable signing secrets.
-- Publish the first public release with its updater manifest and signed APK.
+Still required on devices:
+
 - Install the bootstrap on the device and enable milestone notifications.
 - Exercise a two-version signed update on Realme 5i and TECNO Spark 30 5G, including
   notification denial, unknown-app permission, offline mode, canceled download,
   tampering, canceled installation, reboot, and post-install version confirmation.
 
-No live GitHub release or real-device installation is claimed solely from a local
-APK build or a successful unit test. The release workflow itself requires its first
-configured GitHub Actions run for hosted validation.
+Live publication was verified separately from local build and test results.
+Physical-device installation and notification delivery remain unverified.
 
 The native verification step runs `:app:testDebugUnitTest` after building the
 signed release APK and before preparing or publishing assets. Flutter's build
