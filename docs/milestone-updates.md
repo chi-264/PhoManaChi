@@ -110,6 +110,25 @@ Local release builds use `PHOMANACHI_KEYSTORE_PATH` plus the three password/alia
 environment variables above. Debug builds retain their existing local debug signing.
 No key has been uploaded or repository secret created by this implementation.
 
+### Troubleshoot signing failures
+
+`packageRelease` reporting `Failed to read key ... from store` means the signing
+credentials or uploaded keystore need checking. A `.jks` filename does not mean a
+PKCS12 keystore must be converted; Java detects the format from the contents.
+The workflow now validates the keystore, alias, and private-key password before
+installing Flutter or building. Errors name the setting to check without printing
+its value. The private-key password is checked separately from the store password.
+
+For the unchanged standard Android debug keystore, the store password is `android`,
+the alias is `androiddebugkey`, and the key password is `android`. Enter those exact
+values without quotation marks, trailing spaces, or asterisks. Customized keystores
+require their actual credentials. If needed, replace the Base64 secret by encoding
+the same original keystore again; do not generate a replacement key.
+
+After editing secrets, start a new workflow run. Push this workflow change to `main`
+first to receive the earlier, clearer validation messages; rerunning an old failed
+run uses its original workflow revision. These checks do not change the signing key.
+
 ## Publish each milestone
 
 The repository must be public for unauthenticated devices to access its Releases.
@@ -180,6 +199,12 @@ Still required before live milestone delivery:
 No live GitHub release or real-device installation is claimed solely from a local
 APK build or a successful unit test. The release workflow itself requires its first
 configured GitHub Actions run for hosted validation.
+
+The native verification step runs `:app:testDebugUnitTest` before building the
+signed release APK. AGP 9 enables unit tests only for the tested build type by
+default (debug here), so `:app:testReleaseUnitTest` is not available in this
+configuration. The tests exercise the shared `src/test` update policies and file
+integrity code; the APK is still built with `flutter build apk --release`.
 
 ## Platform references
 

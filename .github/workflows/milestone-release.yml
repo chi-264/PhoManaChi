@@ -28,6 +28,22 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - name: Validate signing secrets before building
+        env:
+          KEYSTORE_BASE64: ${{ secrets.PHOMANACHI_KEYSTORE_BASE64 }}
+          PHOMANACHI_KEYSTORE_PATH: ${{ runner.temp }}/phomanachi-signing-check.jks
+          PHOMANACHI_STORE_PASSWORD: ${{ secrets.PHOMANACHI_STORE_PASSWORD }}
+          PHOMANACHI_KEY_ALIAS: ${{ secrets.PHOMANACHI_KEY_ALIAS }}
+          PHOMANACHI_KEY_PASSWORD: ${{ secrets.PHOMANACHI_KEY_PASSWORD }}
+        run: |
+          test -n "$KEYSTORE_BASE64" || { echo 'Missing PHOMANACHI_KEYSTORE_BASE64 repository secret.'; exit 1; }
+          umask 077
+          trap 'rm -f "$PHOMANACHI_KEYSTORE_PATH"' EXIT
+          if ! printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$PHOMANACHI_KEYSTORE_PATH"; then
+            echo 'PHOMANACHI_KEYSTORE_BASE64 is not valid Base64. Encode the original keystore file again.'
+            exit 1
+          fi
+          java tool/ValidateSigning.java
       - name: Install pinned Flutter SDK
         run: |
           git clone --depth 1 --branch 3.47.4 https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
@@ -39,6 +55,11 @@ jobs:
           flutter analyze --no-pub
           flutter test --no-pub
           python3 -m unittest discover -s tool -p 'test_*.py'
+      - name: Run native update verification tests
+        # AGP 9 creates unit tests for the tested build type (debug) by default.
+        # These shared src/test policies also protect the release APK.
+        working-directory: android
+        run: ./gradlew :app:testDebugUnitTest
       - name: Configure signing and build release APK
         env:
           KEYSTORE_BASE64: ${{ secrets.PHOMANACHI_KEYSTORE_BASE64 }}
@@ -50,10 +71,9 @@ jobs:
           test -n "$KEYSTORE_BASE64" || { echo 'Configure the milestone signing secrets first.'; exit 1; }
           test -n "$PHOMANACHI_STORE_PASSWORD" && test -n "$PHOMANACHI_KEY_ALIAS" && test -n "$PHOMANACHI_KEY_PASSWORD"
           umask 077
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$PHOMANACHI_KEYSTORE_PATH"
           trap 'rm -f "$PHOMANACHI_KEYSTORE_PATH"' EXIT
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$PHOMANACHI_KEYSTORE_PATH"
           flutter build apk --release --no-pub
-          (cd android && ./gradlew :app:testReleaseUnitTest)
       - name: Prepare verified updater assets
         env:
           MILESTONE_TITLE: ${{ inputs.milestone_title }}

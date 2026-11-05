@@ -93,3 +93,13 @@ No live release or physical-device update installation has been performed by thi
   passed. The bootstrap APK and prepared manifest have matching size and SHA-256.
 - Workflow YAML and embedded shell syntax checks passed. A hosted release workflow
   run, production signing, publication, and physical-device verification remain pending.
+- Signing troubleshooting adds an early credential check before the release build.
+  Seven real-keystore fixture tests cover JKS/PKCS12, separate key/store passwords,
+  missing settings, wrong credentials/alias, and corrupt files without logging secrets.
+  The original local debug key also passed validation with standard debug credentials;
+  this does not verify the separately configured GitHub secrets.
+- Fixed the release workflow's unavailable `testReleaseUnitTest` invocation. AGP 9
+  exposes `testDebugUnitTest` under this project's default configuration. Native
+  tests now run in a separate step before the signed release build. The replacement
+  Gradle command succeeded locally; workflow YAML, shell syntax, and step ordering
+  checks passed. Hosted execution still requires pushing the updated workflow.
