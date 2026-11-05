@@ -157,10 +157,11 @@ flutter build apk --debug --no-pub
 python3 tool/prepare_update.py --apk build/app/outputs/flutter-apk/app-debug.apk
 ```
 
-This prepares a development-signed bootstrap in `build/milestone-release/` with the
-APK, manifest, checksum, and release notes. Publish those files under tag `v0.2.0`
-for the initial milestone, ensuring it is the latest stable release. For later
-versions use the matching version tag and the same signing key.
+This prepares development-signed assets in `build/milestone-release/` with the
+APK, manifest, checksum, and release notes. Publish under the tag matching the
+actual APK version (`v0.3.0` for the currently prepared app-management milestone),
+ensuring it is the latest stable release. The initial `v0.2.0` bootstrap is already
+public. Later versions must increase the build number and use the same signing key.
 
 With an authenticated GitHub CLI and publication authorization, the prepared assets
 can be published with `python3 tool/publish_milestone.py`. Production automation

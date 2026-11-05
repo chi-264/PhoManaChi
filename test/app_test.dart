@@ -1,11 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phomanachi/app/app.dart';
@@ -14,9 +9,12 @@ import 'package:phomanachi/core/domain/system_repository.dart';
 import 'package:phomanachi/core/platform/system_api.g.dart';
 import 'package:phomanachi/core/theme/app_theme.dart';
 import 'package:phomanachi/features/dashboard/providers.dart';
+import 'package:phomanachi/features/applications/apps_controller.dart';
 import 'package:phomanachi/features/updates/update_controller.dart';
 
 import 'support/fake_updates.dart';
+import 'support/fake_apps.dart';
+import 'support/rendering.dart';
 
 class TestTheme extends ThemeController {
   @override
@@ -83,6 +81,7 @@ Widget app({
   GlobalKey? captureKey,
 }) => ProviderScope(
   overrides: [
+    appsRepositoryProvider.overrideWithValue(FakeAppsRepository()),
     updateRepositoryProvider.overrideWithValue(FakeUpdatesRepository()),
     themeProvider.overrideWith(dark ? DarkTestTheme.new : TestTheme.new),
     if (repository != null)
@@ -93,50 +92,9 @@ Widget app({
   child: RepaintBoundary(key: captureKey, child: const PhoneManagerApp()),
 );
 
-Future<void> capture(WidgetTester tester, GlobalKey key, String name) async {
-  if (!const bool.fromEnvironment('CAPTURE_PREVIEWS')) return;
-  final boundary =
-      key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-  await tester.runAsync(() async {
-    final rendered = await boundary.toImage(pixelRatio: 2);
-    final bytes = await rendered.toByteData(format: ui.ImageByteFormat.png);
-    Directory('build/previews').createSync(recursive: true);
-    File('build/previews/$name.png')
-        .writeAsBytesSync(bytes!.buffer.asUint8List());
-    rendered.dispose();
-  });
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  setUpAll(() async {
-    // Use the SDK's offline fonts rather than the square Ahem test glyphs.
-    final configFile = File('.dart_tool/package_config.json');
-    final packages =
-        jsonDecode(configFile.readAsStringSync())['packages'] as List;
-    final flutter = packages.firstWhere((entry) => entry['name'] == 'flutter');
-    final root = Directory.fromUri(
-      configFile.absolute.uri.resolve(flutter['rootUri'] as String),
-    ).parent.parent;
-    final fonts = '${root.path}/bin/cache/artifacts/material_fonts';
-    for (final entry in [
-      (
-        'Roboto',
-        ['Roboto-Regular.ttf', 'Roboto-Medium.ttf', 'Roboto-Bold.ttf'],
-      ),
-      ('MaterialIcons', ['MaterialIcons-Regular.otf']),
-    ]) {
-      final loader = FontLoader(entry.$1);
-      for (final file in entry.$2) {
-        loader.addFont(
-          Future.value(
-            ByteData.sublistView(File('$fonts/$file').readAsBytesSync()),
-          ),
-        );
-      }
-      await loader.load();
-    }
-  });
+  setUpAll(loadTestFonts);
   testWidgets(
     'More remains selected on battery details and Back returns to More',
     (tester) async {
@@ -245,6 +203,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          appsRepositoryProvider.overrideWithValue(FakeAppsRepository()),
+          updateRepositoryProvider.overrideWithValue(FakeUpdatesRepository()),
           themeProvider.overrideWith(TestTheme.new),
           snapshotProvider.overrideWith(
             (ref) async => throw Exception('Disconnected'),
@@ -257,7 +217,7 @@ void main() {
     expect(find.text('Device readings unavailable'), findsOneWidget);
     await tester.tap(find.text('Apps'));
     await tester.pumpAndSettle();
-    expect(find.text('Application inventory planned'), findsOneWidget);
+    expect(find.text('Your applications.'), findsOneWidget);
     expect(find.text('Device readings unavailable'), findsNothing);
     await tester.tap(find.text('More'));
     await tester.pumpAndSettle();

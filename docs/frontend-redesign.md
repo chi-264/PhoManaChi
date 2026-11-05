@@ -29,8 +29,10 @@ widgets and keeps the existing typed Kotlin system-reading integration.
 
 ## Deliberate remaining scope
 
-This change redesigns the existing application foundation. It does not implement
-file scanning/deletion, application inventory/uninstall, detailed process records
+The original frontend milestone redesigned the existing application foundation.
+The subsequent [app-management milestone](app-management.md) adds visible inventory,
+app details, supported uninstall, and live capability states. Remaining work includes
+file scanning/deletion, detailed process records
 or control, manufacturer activity launching, or Shizuku. Their screens explain
 what is available and what has not been implemented. The storage screen describes
 the future confirmed-cleanup sequence without exposing an inactive destructive flow.
