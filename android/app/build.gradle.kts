@@ -4,6 +4,12 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val milestoneKeystore = System.getenv("PHOMANACHI_KEYSTORE_PATH")
+val milestoneStorePassword = System.getenv("PHOMANACHI_STORE_PASSWORD")
+val milestoneKeyAlias = System.getenv("PHOMANACHI_KEY_ALIAS")
+val milestoneKeyPassword = System.getenv("PHOMANACHI_KEY_PASSWORD")
+val milestoneSigningReady = listOf(milestoneKeystore, milestoneStorePassword, milestoneKeyAlias, milestoneKeyPassword).all { !it.isNullOrBlank() }
+
 android {
     namespace = "dev.phomanachi.phomanachi"
     compileSdk = flutter.compileSdkVersion
@@ -29,11 +35,20 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (milestoneSigningReady) {
+            create("milestone") {
+                storeFile = file(milestoneKeystore!!)
+                storePassword = milestoneStorePassword
+                keyAlias = milestoneKeyAlias
+                keyPassword = milestoneKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (milestoneSigningReady) signingConfigs.getByName("milestone") else null
         }
     }
 }
@@ -50,4 +65,12 @@ flutter {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+    testImplementation("junit:junit:4.13.2")
+}
+
+// Publishing a randomly debug-signed replacement would break installed update chains.
+gradle.taskGraph.whenReady {
+    if (allTasks.any { it.name == "packageRelease" || it.name == "bundleRelease" || it.name == "assembleRelease" }) {
+        check(milestoneSigningReady) { "Release signing is required. Configure PHOMANACHI_KEYSTORE_PATH, PHOMANACHI_STORE_PASSWORD, PHOMANACHI_KEY_ALIAS, and PHOMANACHI_KEY_PASSWORD using the same key as installed APKs." }
+    }
 }

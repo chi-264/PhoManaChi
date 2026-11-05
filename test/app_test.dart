@@ -14,6 +14,9 @@ import 'package:phomanachi/core/domain/system_repository.dart';
 import 'package:phomanachi/core/platform/system_api.g.dart';
 import 'package:phomanachi/core/theme/app_theme.dart';
 import 'package:phomanachi/features/dashboard/providers.dart';
+import 'package:phomanachi/features/updates/update_controller.dart';
+
+import 'support/fake_updates.dart';
 
 class TestTheme extends ThemeController {
   @override
@@ -80,6 +83,7 @@ Widget app({
   GlobalKey? captureKey,
 }) => ProviderScope(
   overrides: [
+    updateRepositoryProvider.overrideWithValue(FakeUpdatesRepository()),
     themeProvider.overrideWith(dark ? DarkTestTheme.new : TestTheme.new),
     if (repository != null)
       systemRepositoryProvider.overrideWithValue(repository)
@@ -221,6 +225,7 @@ void main() {
           '/more/advanced',
           '/more/settings',
           '/more/about',
+          '/more/updates',
         ]) {
           router.go(route);
           await tester.pumpAndSettle();

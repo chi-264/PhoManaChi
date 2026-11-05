@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/settings.dart';
 import '../../core/theme/app_theme.dart';
@@ -102,6 +103,19 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
         ],
+        const SectionHeading('Milestone updates'),
+        Card(
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(20),
+            leading: const Icon(Icons.system_update_outlined),
+            title: const Text('App updates'),
+            subtitle: const Text(
+              'Review releases and choose whether to enable background notifications.',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/more/updates'),
+          ),
+        ),
         const SectionHeading('Monitoring & privacy'),
         const DetailCard(
           rows: [

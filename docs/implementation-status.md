@@ -45,8 +45,9 @@ versions independently. Manufacturer profiles must remain disabled until tested.
 Use PRD v1.1 and Architecture v1.1 as the implementation baseline. UI/UX, Personas, and
 Journeys v1.0 support that Flutter design. The original Kotlin/Compose documents are
 historical. Default package identifier is `dev.phomanachi.phomanachi`; confirm ownership
-before publishing. No backend, analytics, advertising SDK, or release internet permission
-is included. Debug/profile manifests retain Flutter development network access.
+before publishing. No backend, analytics, or advertising SDK is included. Version 0.2.0 adds internet
+access for the user-requested optional milestone updater; core readings remain offline.
+Debug/profile manifests retain Flutter development network access.
 
 ## Original foundation verification
 
@@ -66,3 +67,29 @@ is included. Debug/profile manifests retain Flutter development network access.
   in `build/previews/`. Values are test fixtures, not physical-device readings.
 - Physical-device and TalkBack validation remain pending.
 - Final `flutter analyze --no-pub`: passed with no issues.
+
+
+## Milestone updater (0.2.0 / build 2)
+
+Implemented typed Flutter/Kotlin update APIs, App updates UI, foreground availability
+banner, manual and opt-in scheduled checks, notification permission/status/deep links,
+streamed/cancelable APK downloads, checksum/identity/version/signer verification,
+user-confirmed Android installation, and a signed GitHub milestone release workflow.
+
+The old APK must be updated once to bootstrap this feature. Live delivery needs a
+public release manifest, stable signing credentials, and notification opt-in.
+See [milestone updates](milestone-updates.md) for publishing and device validation.
+No live release or physical-device update installation has been performed by this change.
+
+### Updater verification
+
+- `flutter analyze --no-pub`: passed with no issues.
+- `flutter test --no-pub`: all 25 tests passed, including update flows and the
+  narrow-screen update banner with large text.
+- `./gradlew :app:assembleDebug :app:testDebugUnitTest` from `android/`: passed;
+  all 11 native policy and file-integrity tests passed.
+- Python release-packaging unit tests: all four passed.
+- Final debug APK signature/identity inspection and release-asset preparation:
+  passed. The bootstrap APK and prepared manifest have matching size and SHA-256.
+- Workflow YAML and embedded shell syntax checks passed. A hosted release workflow
+  run, production signing, publication, and physical-device verification remain pending.

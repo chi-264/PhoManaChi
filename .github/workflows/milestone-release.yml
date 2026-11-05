@@ -1,0 +1,64 @@
+name: Publish milestone APK
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      milestone_title:
+        description: 'Optional milestone title (version comes from pubspec.yaml)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: milestone-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install pinned Flutter SDK
+        run: |
+          git clone --depth 1 --branch 3.47.4 https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/flutter/bin/flutter" --version
+      - name: Resolve dependencies and test
+        run: |
+          flutter pub get
+          flutter analyze --no-pub
+          flutter test --no-pub
+          python3 -m unittest discover -s tool -p 'test_*.py'
+      - name: Configure signing and build release APK
+        env:
+          KEYSTORE_BASE64: ${{ secrets.PHOMANACHI_KEYSTORE_BASE64 }}
+          PHOMANACHI_KEYSTORE_PATH: ${{ runner.temp }}/phomanachi-release.jks
+          PHOMANACHI_STORE_PASSWORD: ${{ secrets.PHOMANACHI_STORE_PASSWORD }}
+          PHOMANACHI_KEY_ALIAS: ${{ secrets.PHOMANACHI_KEY_ALIAS }}
+          PHOMANACHI_KEY_PASSWORD: ${{ secrets.PHOMANACHI_KEY_PASSWORD }}
+        run: |
+          test -n "$KEYSTORE_BASE64" || { echo 'Configure the milestone signing secrets first.'; exit 1; }
+          test -n "$PHOMANACHI_STORE_PASSWORD" && test -n "$PHOMANACHI_KEY_ALIAS" && test -n "$PHOMANACHI_KEY_PASSWORD"
+          umask 077
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$PHOMANACHI_KEYSTORE_PATH"
+          trap 'rm -f "$PHOMANACHI_KEYSTORE_PATH"' EXIT
+          flutter build apk --release --no-pub
+          (cd android && ./gradlew :app:testReleaseUnitTest)
+      - name: Prepare verified updater assets
+        env:
+          MILESTONE_TITLE: ${{ inputs.milestone_title }}
+        run: python3 tool/prepare_update.py --apk build/app/outputs/flutter-apk/app-release.apk --title "$MILESTONE_TITLE"
+      - name: Publish complete milestone
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tool/publish_milestone.py

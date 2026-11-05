@@ -18,8 +18,16 @@ PRD v1.1 and System Architecture v1.1 supersede the native-only v1.0 design.
 
 Storage scanning/deletion, application inventory, detailed process inspection, manufacturer
 launching, and Shizuku are **not implemented yet**. Their screens explain the current status.
-No file deletion, process termination, broad storage permission, or package inventory permission
+No personal-file deletion, process termination, broad storage permission, or package inventory permission
 is enabled in this foundation.
+
+## Milestone updates
+
+Version 0.2.0 adds More → App updates: manual release checks, opt-in periodic
+notifications, verified APK downloads, and Android-confirmed installation.
+Core readings still work offline. See [milestone update setup](docs/milestone-updates.md)
+for the initial bootstrap install, GitHub Releases, stable signing secrets, and
+the release workflow. Live delivery requires publishing the first release.
 
 ## Development
 
@@ -34,8 +42,9 @@ flutter test
 flutter run
 ```
 
-Build a debug APK with `flutter build apk --debug`. Release signing is not configured;
-the scaffold uses debug signing and is not ready for store publication.
+Build a debug APK with `flutter build apk --debug`. Release builds require the
+stable signing environment described in the milestone update guide. This project
+distributes direct APK updates through public GitHub Releases.
 
 ## Architecture
 

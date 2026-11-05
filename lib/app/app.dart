@@ -3,10 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/theme/app_theme.dart';
+import '../core/platform/update_api.g.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/dashboard/providers.dart';
 import '../features/more/more_screen.dart';
 import '../features/more/settings_screen.dart';
+import '../features/updates/updates_screen.dart';
+import '../features/updates/update_controller.dart';
 import 'settings.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -51,6 +54,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                           ResourceScreen(kind: '/${entry.$1}', title: entry.$2),
                     ),
                   GoRoute(
+                    path: 'updates',
+                    builder: (_, _) => const UpdatesScreen(),
+                  ),
+                  GoRoute(
                     path: 'settings',
                     builder: (_, _) => const SettingsScreen(),
                   ),
@@ -82,10 +89,21 @@ class _PhoneManagerAppState extends ConsumerState<PhoneManagerApp>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    UpdateFlutterApi.setUp(
+      _UpdateCallbacks(
+        changed: () {
+          if (mounted) ref.read(updatesProvider.notifier).refresh();
+        },
+        open: () {
+          if (mounted) ref.read(routerProvider).go('/more/updates');
+        },
+      ),
+    );
   }
 
   @override
   void dispose() {
+    UpdateFlutterApi.setUp(null);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -93,6 +111,9 @@ class _PhoneManagerAppState extends ConsumerState<PhoneManagerApp>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) ref.invalidate(snapshotProvider);
+    ref
+        .read(updatesProvider.notifier)
+        .setForeground(state == AppLifecycleState.resumed);
   }
 
   @override
@@ -264,7 +285,15 @@ class AppShell extends StatelessWidget {
                   ],
                 ),
               ),
-            Expanded(child: shell),
+            Expanded(
+              child: Column(
+                children: [
+                  if (location != '/more/updates')
+                    const UpdateAvailableBanner(),
+                  Expanded(child: shell),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -288,4 +317,14 @@ class AppShell extends StatelessWidget {
             ),
     );
   }
+}
+
+class _UpdateCallbacks extends UpdateFlutterApi {
+  _UpdateCallbacks({required this.changed, required this.open});
+  final VoidCallback changed;
+  final VoidCallback open;
+  @override
+  void statusChanged() => changed();
+  @override
+  void openUpdates() => open();
 }

@@ -57,6 +57,13 @@ class MoreScreen extends StatelessWidget {
       _ToolList(
         entries: const [
           (
+            'updates',
+            'App updates',
+            'Milestones, downloads, and notifications.',
+            Icons.system_update_outlined,
+            Accent.blue,
+          ),
+          (
             'settings',
             'Settings',
             'Appearance, monitoring, and privacy.',
