@@ -42,3 +42,29 @@ int? estimatedUsedMemory(SystemSnapshot snapshot) {
   }
   return total - available;
 }
+
+int? usedStorageBytes(SystemSnapshot snapshot) =>
+    usedBytes(snapshot.totalStorageBytes, snapshot.availableStorageBytes);
+
+int? usedBytes(int? total, int? available) {
+  if (total == null ||
+      available == null ||
+      total < 0 ||
+      available < 0 ||
+      available > total) {
+    return null;
+  }
+  return total - available;
+}
+
+double? usedFraction(int? total, int? available) {
+  final used = usedBytes(total, available);
+  return used == null || total == null || total == 0 ? null : used / total;
+}
+
+double? validBatteryPercent(SystemSnapshot snapshot) {
+  final value = snapshot.batteryPercent;
+  return value != null && value.isFinite && value >= 0 && value <= 100
+      ? value
+      : null;
+}

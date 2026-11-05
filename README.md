@@ -3,7 +3,7 @@
 An offline, ad-free Android utility based on the specifications in `Documentations/`.
 PRD v1.1 and System Architecture v1.1 supersede the native-only v1.0 design.
 
-## Foundation delivered
+## Foundation and frontend delivered
 
 - Android-only Flutter project (minimum Android 9 / API 28).
 - Material 3, light/dark/system themes persisted with SharedPreferencesAsync.
@@ -13,6 +13,8 @@ PRD v1.1 and System Architecture v1.1 supersede the native-only v1.0 design.
 - Real device identity, overall physical RAM, internal storage capacity, and battery readings.
 - Manual refresh and refresh on app resume; no continuous background polling.
 - Independent native read failures, unavailable states, and retry UI.
+- Figma-inspired cards, readable compact layouts, adaptive wide navigation, and shared UI components.
+- Secondary tools nested under More, with selected navigation and Back behavior.
 
 Storage scanning/deletion, application inventory, detailed process inspection, manufacturer
 launching, and Shizuku are **not implemented yet**. Their screens explain the current status.
@@ -50,4 +52,5 @@ Storage totals represent the internal data volume; they are not a complete file 
 Estimated used RAM is total minus available RAM, not the sum of application usage.
 Battery health is the system's categorical state, not a capacity or lifetime estimate.
 
-See [implementation status](docs/implementation-status.md) for the remaining milestones.
+See [implementation status](docs/implementation-status.md) for the remaining milestones
+and [frontend redesign](docs/frontend-redesign.md) for scope, UI validation, and preview generation.

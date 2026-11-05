@@ -7,7 +7,7 @@ final themeProvider = AsyncNotifierProvider<ThemeController, ThemeMode>(
 );
 
 class ThemeController extends AsyncNotifier<ThemeMode> {
-  final _preferences = SharedPreferencesAsync();
+  late final _preferences = SharedPreferencesAsync();
   @override
   Future<ThemeMode> build() async {
     final name = await _preferences.getString('theme');

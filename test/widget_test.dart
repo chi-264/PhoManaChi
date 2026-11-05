@@ -26,6 +26,20 @@ void main() {
     expect(formatBytes(null), 'Unavailable');
     expect(formatBytes(0), '0 B');
   });
+  test('Storage and battery readings reject invalid values', () {
+    final data = snapshot();
+    data.totalStorageBytes = 100;
+    data.availableStorageBytes = 120;
+    expect(usedStorageBytes(data), isNull);
+    expect(usedFraction(0, 0), isNull);
+    expect(usedFraction(100, 25), 0.75);
+    data.batteryPercent = double.nan;
+    expect(validBatteryPercent(data), isNull);
+    data.batteryPercent = 101;
+    expect(validBatteryPercent(data), isNull);
+    data.batteryPercent = 0;
+    expect(validBatteryPercent(data), 0);
+  });
   testWidgets('Missing readings show unavailable rather than zero', (
     tester,
   ) async {
