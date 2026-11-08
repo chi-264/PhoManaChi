@@ -266,7 +266,7 @@ class ResourceScreen extends ConsumerWidget {
           ),
           FeatureTile(
             title: 'Storage Cleaner',
-            subtitle: 'See how much space is available.',
+            subtitle: 'Analyze files, compare duplicates, and review cleanup.',
             icon: Icons.folder_open_rounded,
             accent: Accent.purple,
             onTap: () => context.go('/storage'),
@@ -314,32 +314,6 @@ class ResourceScreen extends ConsumerWidget {
         'Estimated used RAM is a system-level calculation, not a sum of individual app usage. Available RAM alone does not measure device performance.',
       ),
     ],
-    '/storage' => [
-      const SectionHeading('File analysis'),
-      const UnavailableFeature(
-        title: 'Storage scanning planned',
-        message: 'Capacity readings are available above. File access, categories, duplicate groups, and cleanup are not available in this build. No personal files are scanned or removed.',
-        icon: Icons.folder_open_rounded,
-      ),
-      const SectionHeading('Safe cleanup, when available'),
-      const DetailCard(
-        rows: [
-          ('1. Choose access', 'Select accessible media or folders.'),
-          (
-            '2. Review files',
-            'Compare files and keep a copy of each duplicate group.',
-          ),
-          (
-            '3. Confirm deletion',
-            'Approve specific files and Android authorization.',
-          ),
-          (
-            '4. Review results',
-            'See confirmed deletions, skipped files, and failures.',
-          ),
-        ],
-      ),
-    ],
     '/battery' => [
       const SizedBox(height: 24),
       const InfoNotice(
@@ -365,7 +339,7 @@ class ResourceScreen extends ConsumerWidget {
       const SectionHeading('Implementation status'),
       const DetailCard(
         rows: [
-          ('Optional file access', 'Not requested'),
+          ('File analysis', 'Choose scope and access in Storage'),
           ('Application inventory', 'Visible apps · current Android profile'),
           ('Detailed process inspection', 'Not implemented'),
           ('Manufacturer profiles', 'Not validated'),

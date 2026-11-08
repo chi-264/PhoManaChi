@@ -13,6 +13,9 @@ import '../features/more/more_screen.dart';
 import '../features/more/settings_screen.dart';
 import '../features/updates/updates_screen.dart';
 import '../features/updates/update_controller.dart';
+import '../core/platform/storage_api.g.dart';
+import '../features/storage/storage_controller.dart';
+import '../features/storage/storage_screen.dart';
 import 'settings.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -26,7 +29,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           for (final entry in const [
             ('/dashboard', 'Dashboard'),
             ('/processes', 'Process Manager'),
-            ('/storage', 'Storage Cleaner'),
           ])
             StatefulShellBranch(
               routes: [
@@ -37,6 +39,14 @@ final routerProvider = Provider<GoRouter>((ref) {
                 ),
               ],
             ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/storage',
+                builder: (_, _) => const StorageScreen(),
+              ),
+            ],
+          ),
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -111,6 +121,7 @@ class _PhoneManagerAppState extends ConsumerState<PhoneManagerApp>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     AppsFlutterApi.setUp(_AppsCallbacks(changed: _refreshApps));
+    StorageFlutterApi.setUp(_StorageCallbacks(changed: _refreshStorage));
     UpdateFlutterApi.setUp(
       _UpdateCallbacks(
         changed: () {
@@ -126,6 +137,7 @@ class _PhoneManagerAppState extends ConsumerState<PhoneManagerApp>
   @override
   void dispose() {
     AppsFlutterApi.setUp(null);
+    StorageFlutterApi.setUp(null);
     UpdateFlutterApi.setUp(null);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -133,6 +145,11 @@ class _PhoneManagerAppState extends ConsumerState<PhoneManagerApp>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (ref.exists(storageProvider)) {
+      ref
+          .read(storageProvider.notifier)
+          .setForeground(state == AppLifecycleState.resumed);
+    }
     if (state == AppLifecycleState.resumed) {
       ref.invalidate(snapshotProvider);
       _refreshApps();
@@ -140,6 +157,12 @@ class _PhoneManagerAppState extends ConsumerState<PhoneManagerApp>
     ref
         .read(updatesProvider.notifier)
         .setForeground(state == AppLifecycleState.resumed);
+  }
+
+  void _refreshStorage() {
+    if (mounted && ref.exists(storageProvider)) {
+      ref.read(storageProvider.notifier).refresh();
+    }
   }
 
   void _refreshApps() {
@@ -376,4 +399,11 @@ class _AppsCallbacks extends AppsFlutterApi {
   final VoidCallback changed;
   @override
   void actionChanged() => changed();
+}
+
+class _StorageCallbacks extends StorageFlutterApi {
+  _StorageCallbacks({required this.changed});
+  final VoidCallback changed;
+  @override
+  void stateChanged() => changed();
 }

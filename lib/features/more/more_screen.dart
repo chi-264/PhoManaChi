@@ -146,7 +146,7 @@ class AboutScreen extends StatelessWidget {
       SizedBox(height: 16),
       InfoNotice(
         'Always your choice',
-        'File cleanup and advanced actions are not enabled in this development build. Future destructive operations will require your confirmation.',
+        'File cleanup requires choosing access, reviewing specific files, and confirming deletion. Detailed process control and advanced access remain unavailable.',
         accent: Accent.purple,
         icon: Icons.touch_app_outlined,
       ),

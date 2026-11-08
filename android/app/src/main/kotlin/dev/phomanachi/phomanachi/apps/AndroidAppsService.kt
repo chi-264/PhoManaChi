@@ -177,7 +177,7 @@ class AndroidAppsService(private val activity: Activity, private val changed: ()
                 when (notifications) { true -> "Android allows milestone notifications. Enable automatic checks in App updates to receive them."; false -> "Notifications are blocked. Allow them in Android settings if you want milestone alerts."; null -> "Notification access could not be checked. Retry to refresh its state." }),
             AppCapability("installUpdates", "Install downloaded updates", when (install) { true -> AccessState.AVAILABLE; false -> AccessState.PERMISSION_REQUIRED; null -> AccessState.UNAVAILABLE },
                 when (install) { null -> "Installation access could not be checked. Retry to refresh its state."; false -> "Allow Phone Manager to request installation of verified APK updates in Android settings. Every installation still requires your confirmation."; true -> "Android allows installation requests. Every APK installation still requires your confirmation." }),
-            AppCapability("fileCleanup", "File cleanup", AccessState.UNSUPPORTED, "File scanning and deletion are not available in this version."),
+            AppCapability("fileCleanup", "Storage analysis and cleanup", AccessState.AVAILABLE, "Choose files, a folder, or media access in Storage. Access and deletion support are checked per file; cleanup requires review and confirmation."),
             AppCapability("processControl", "Control other apps' processes", AccessState.RESTRICTED, "Standard Android access does not allow unrestricted control of other apps' processes."),
             AppCapability("advanced", "Advanced access", AccessState.UNSUPPORTED, "Shizuku and root actions are not enabled in this version.")))
     }
