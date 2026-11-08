@@ -31,11 +31,10 @@ widgets and keeps the existing typed Kotlin system-reading integration.
 
 The original frontend milestone redesigned the existing application foundation.
 The subsequent [app-management milestone](app-management.md) adds visible inventory,
-app details, supported uninstall, and live capability states. Remaining work includes
-file scanning/deletion, detailed process records
-or control, manufacturer activity launching, or Shizuku. Their screens explain
-what is available and what has not been implemented. The storage screen describes
-the future confirmed-cleanup sequence without exposing an inactive destructive flow.
+app details, supported uninstall, and live capability states. The subsequent
+[storage milestone](storage-cleaner.md) adds chosen-scope native scanning, categories,
+large files, verified duplicates, explicit reviewed cleanup, and per-file outcomes.
+Detailed process records/control, manufacturer launching, and Shizuku remain unavailable.
 
 Those features still need the complete detail, permission, confirmation, result,
 and recovery workflows listed in the audit. In particular, no fake process rows,
@@ -59,7 +58,7 @@ flutter test --no-pub --dart-define=CAPTURE_PREVIEWS=true
 
 The screenshots in `build/previews/` use **test fixture readings**, not measurements
 from a physical phone. They show the dashboard at compact light/dark widths and
-at a wide width. Physical-device rendering, TalkBack behavior, and real readings
+at a wide width, plus app and storage flows in both themes. Physical-device rendering, TalkBack behavior, and real readings
 still require testing on the target Realme and TECNO phones.
 
 Run `flutter analyze --no-pub`, `flutter test --no-pub`, and

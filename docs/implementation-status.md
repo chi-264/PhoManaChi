@@ -1,6 +1,6 @@
 # Implementation status
 
-## Current milestone: App management and capabilities (0.3.0 / build 3)
+## Current milestone: Storage analysis and safe cleanup (0.4.0 / build 4)
 
 Implemented: Flutter Android shell, Riverpod, go_router, SharedPreferencesAsync theme,
 Pigeon contract v1, Kotlin host registration/cleanup, background system snapshot reads,
@@ -17,8 +17,14 @@ user/system filters and sorting; app details and permission grant flags; Android
 settings shortcuts; reviewed, protected uninstall requests and verified/unverified
 outcomes; and a typed native capability resolver with a live Permissions screen.
 See [app management](app-management.md) for behavior, Android limitations, and
-physical-device acceptance. Version 0.3.0+3 is prepared on `feature/app-management`;
-it has not been published or physically validated yet.
+physical-device acceptance. Version 0.3.0+3 is publicly published; physical-device
+acceptance remains pending.
+
+Version 0.4.0+4 on `feature/storage-cleaner` adds SAF/MediaStore access, bounded
+cancellable native scans, file categories/search/sort/large files, streamed SHA-256
+duplicate groups, expiring native reviews, explicit per-file deletion with retained-copy
+checks, verified/unverified outcomes, and separate logical-byte/free-space reports.
+See [storage cleanup](storage-cleaner.md) for safeguards and limitations.
 
 Automated checks cover absent/inconsistent RAM readings, unavailable values in the UI,
 and native-read errors with retry. An Android APK build checks Dart, generated bindings,
@@ -27,11 +33,10 @@ actual build/test results; successful compilation is not physical-device validat
 
 ## Next milestones
 
-1. Validate app management on the target phones and publish the prepared 0.3.0
-   milestone; exercise the complete update from the installed 0.2.0 build.
-2. Storage: MediaStore/SAF selection, cancellable identified scans, categories, hashing,
-   explicit deletion confirmation, per-file verification, separate deleted-byte and
-   free-space-change reports. Enforce critical rules natively.
+1. Validate app management and storage on the target phones; exercise the complete
+   installed v0.3.0 → v0.4.0 update before broad use of destructive actions.
+2. Complete acceptance and publish the prepared 0.4.0 storage milestone with the
+   existing signing key through a new milestone workflow run.
 3. Processes: accessible own-process diagnostics and accurately sourced observations,
    optional usage history, protected-target policy, disabled unsupported controls.
 4. Manufacturer tools: firmware-specific verified profiles, exported activity checks,
@@ -145,6 +150,42 @@ not physical-device installation, certificate continuity, or notification delive
   inspected in `build/previews/`. Fixtures are not physical-device readings.
   Compact 320 px layouts at 2× text passed in both themes.
 - Release workflow YAML, embedded shell syntax, and build/test/publication order
-  checks passed. Publication of 0.3.0 remains pending on `feature/app-management`.
+  checks passed. Public release v0.3.0 was verified on 8 November 2026; physical
+  acceptance remains pending.
 - ADB reports no authorized connected device. Physical uninstall/settings behavior,
   TalkBack, and the complete installed v0.2.0 → v0.3.0 update remain unverified.
+
+## Storage verification (0.4.0 / build 4)
+
+- `flutter analyze --no-pub`: passed with no issues.
+- `flutter test --no-pub --dart-define=CAPTURE_PREVIEWS=true`: all 60 tests passed.
+  Storage coverage includes combined filters and unknown sizes, native-review-only
+  confirmation, retained-copy selection across filters, changed job IDs, canceled
+  pickers/scans, revoked-access review failure, foreground-only polling, canceling
+  pending proof preparation, real checkbox selection, and review/cancel/delete UI.
+- Storage previews were regenerated with the actual Scaffold surface; all 15 storage
+  tests passed again. Light/dark layouts, 320 px / 2× text, duplicate rows, review,
+  and negative internal free-space changes were checked. Fixtures are synthetic
+  test data, not device evidence. Previews are in `build/previews/storage-*.png`.
+- Final `./gradlew :app:testDebugUnitTest`: all 28 native tests passed (9 storage
+  policy/hash tests, 8 app-policy, 8 update-policy, 3 file-integrity). Storage policy
+  tests cover exact identity, bounded streaming/hash size changes and cancellation,
+  native selection/job limits, retained copies, protected paths, and positive
+  deletion-plus-absence requirements.
+- Python release tooling: all 11 tests passed.
+- Public v0.3.0 APK downloaded and its manifest SHA-256 and size verified as the
+  signing-continuity baseline. No authorized Android device was connected; SAF,
+  MediaStore authorization/deletion, interrupted-report recovery, TalkBack, OEM
+  behavior, and installed v0.3.0 → v0.4.0 delivery remain device acceptance work.
+- Final `flutter build apk --release --no-pub`: passed. Signed APK is
+  `build/app/outputs/flutter-apk/app-release.apk` (54,751,073 bytes), version 0.4.0,
+  build 4, minimum API 28. Its signing certificate matches the verified public
+  v0.3.0 APK. Inspected permissions include scoped media/SAF access, without
+  MANAGE_EXTERNAL_STORAGE, MANAGE_MEDIA, or QUERY_ALL_PACKAGES.
+- Prepared `build/milestone-release/` with the signed APK, update manifest,
+  checksum, and release notes. Built/prepared APK bytes and SHA-256 match the
+  manifest; version, code, exact v0.4.0 asset URL, and notes were checked.
+- Production source fingerprint was unchanged between final native checks and
+  APK verification. Changes are uncommitted on `feature/storage-cleaner`;
+  publication is pending. Commit/push and merge the milestone before starting a
+  new Publish milestone APK workflow run on the intended branch.

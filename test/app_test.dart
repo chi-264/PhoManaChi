@@ -14,6 +14,10 @@ import 'package:phomanachi/features/updates/update_controller.dart';
 
 import 'support/fake_updates.dart';
 import 'support/fake_apps.dart';
+import 'support/fake_storage.dart';
+
+import 'package:phomanachi/features/storage/storage_controller.dart';
+
 import 'support/rendering.dart';
 
 class TestTheme extends ThemeController {
@@ -82,6 +86,7 @@ Widget app({
 }) => ProviderScope(
   overrides: [
     appsRepositoryProvider.overrideWithValue(FakeAppsRepository()),
+    storageRepositoryProvider.overrideWithValue(FakeStorageRepository()),
     updateRepositoryProvider.overrideWithValue(FakeUpdatesRepository()),
     themeProvider.overrideWith(dark ? DarkTestTheme.new : TestTheme.new),
     if (repository != null)
@@ -103,7 +108,7 @@ void main() {
       expect(find.text('Test Phone'), findsOneWidget);
       await tester.tap(find.text('Storage'));
       await tester.pumpAndSettle();
-      expect(find.text('Storage scanning planned'), findsOneWidget);
+      expect(find.text('Your files, your choice.'), findsOneWidget);
       await tester.tap(find.text('More'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Battery Monitor'));
@@ -204,6 +209,7 @@ void main() {
       ProviderScope(
         overrides: [
           appsRepositoryProvider.overrideWithValue(FakeAppsRepository()),
+          storageRepositoryProvider.overrideWithValue(FakeStorageRepository()),
           updateRepositoryProvider.overrideWithValue(FakeUpdatesRepository()),
           themeProvider.overrideWith(TestTheme.new),
           snapshotProvider.overrideWith(

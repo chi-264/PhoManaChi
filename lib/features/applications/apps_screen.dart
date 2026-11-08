@@ -554,6 +554,11 @@ class PermissionsScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 12),
                         Text(item.reason),
+                        if (item.id == 'fileCleanup')
+                          OutlinedButton(
+                            onPressed: () => context.go('/storage'),
+                            child: const Text('Choose storage access'),
+                          ),
                         if ([
                           'notifications',
                           'installUpdates',
